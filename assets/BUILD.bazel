@@ -1,0 +1,13 @@
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+pkg_tar(
+    name = "assets",
+    srcs = [
+        ":avatar.jpg",
+        ":favicon.ico",
+        ":lissom.min.css",
+        ":styles.css",
+    ],
+    package_dir = "assets",
+    visibility = ["//visibility:public"],
+)

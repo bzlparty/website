@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "build": "bazel build //:website",
+    "dist": "mkdir public; tar xvf bazel-bin/website.tar -C ./public --wildcards bzlparty_website/dist/** --strip-components=2",
+    "serve": "ibazel run //:serve"
+  },
+  "devDependencies": {
+    "@bazel/bazelisk": "1.19.0",
+    "@bazel/ibazel": "0.24.0"
+  }
+}

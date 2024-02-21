@@ -1,0 +1,71 @@
+html,
+body {
+  width: 820px;
+  margin: 0 auto;
+}
+
+a[href="/"] {
+  position: relative;
+  line-height: 1.4;
+}
+a[href="/"]::before {
+  position: absolute;
+  left: -8ch;
+  content: "bzlparty";
+  color: var(--accent-ui);
+  font-weight: bold;
+  font-size: 2.1em;
+}
+
+img[src^="https://github.com"],
+img[src^="https://img.shields.io"]
+{
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  transition: none;
+}
+
+a.github-icon-link {
+  text-decoration: none;
+}
+
+nav {
+  display: flex;
+  margin-top: 1em;
+}
+
+nav > a > img {
+  height: 62px;
+  width: auto;
+}
+
+nav > ul {
+  list-style-type: none;
+}
+
+nav > ul > li {
+  float: left;
+  font-size: 1.3em;
+  margin: 0 10px;
+}
+
+dl > dt {
+  margin: 10px auto 5px auto;
+}
+
+dl > dd {
+  margin: 5px 31px;
+}
+
+footer {
+  margin-top: 62px;
+}
+
+footer > p {
+  text-align: center;
+}
+
+table {
+  width: 100%;
+}

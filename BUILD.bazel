@@ -1,0 +1,73 @@
+load("@buildifier_prebuilt//:rules.bzl", "buildifier", "buildifier_test")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("//internal:render_html.bzl", "html_pkg_tar")
+
+pkg_tar(
+    name = "src",
+    srcs = [
+        "//src",
+        "@docs_rules_compress//:docs",
+        "@docs_rules_html//:docs",
+        "@docs_rules_quickjs//:docs",
+        "@docs_tools//:docs",
+    ],
+    package_dir = "src",
+)
+
+SOURCE_PKGS = {
+    "tools": "@docs_tools//:docs",
+    "rules_compress": "@docs_rules_compress//:docs",
+    "rules_quickjs": "@docs_rules_quickjs//:docs",
+    "rules_html": "@docs_rules_html//:docs",
+}
+
+html_pkg_tar(
+    name = "dist",
+    srcs = SOURCE_PKGS,
+    package_dir = "dist",
+    deps = [
+        "//assets",
+        "//src:dist",
+    ],
+)
+
+sh_binary(
+    name = "serve",
+    srcs = ["//internal:serve_html.sh"],
+    args = [
+        "$(location :dist)",
+        "dist/",
+    ],
+    data = [":dist"],
+)
+
+pkg_tar(
+    name = "website",
+    srcs = [
+        ":LICENSE",
+        ":README.md",
+    ],
+    package_dir = "bzlparty_website",
+    deps = [
+        ":dist",
+        ":src",
+    ],
+)
+
+buildifier(
+    name = "format",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "fix",
+    mode = "fix",
+)
+
+buildifier_test(
+    name = "lint",
+    size = "small",
+    lint_mode = "warn",
+    mode = "check",
+    no_sandbox = True,
+    workspace = "//:WORKSPACE",
+)

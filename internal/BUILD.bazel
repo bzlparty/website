@@ -1,0 +1,25 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+exports_files([
+    "package.html",
+    "serve_html.sh",
+])
+
+go_binary(
+    name = "render_html",
+    embed = [":render_html_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "render_html_lib",
+    srcs = ["render_html.go"],
+    importpath = "github.com/bzlparty/website/tools",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_gomarkdown_markdown//:go_default_library",
+        "@com_github_gomarkdown_markdown//ast:go_default_library",
+        "@com_github_gomarkdown_markdown//html:go_default_library",
+        "@com_github_gomarkdown_markdown//parser:go_default_library",
+    ],
+)

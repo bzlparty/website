@@ -1,0 +1,48 @@
+module(
+    name = "bzlparty_website",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "rules_pkg", version = "0.10.1")
+bazel_dep(name = "rules_go", version = "0.46.0")
+
+bazel_dep(name = "buildifier_prebuilt", version = "6.4.0", dev_dependency = True)
+
+bazel_dep(name = "gazelle", version = "0.35.0")
+
+go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
+go_deps.from_file(go_mod = "//:go.mod")
+use_repo(
+    go_deps,
+    "com_github_gomarkdown_markdown",
+)
+
+docs = use_extension("//internal:extensions.bzl", "docs")
+docs.repository(
+    name = "docs_tools",
+    commit = "4fcedfa5a171f37d035112658ae59df01eba364e",
+    project = "tools",
+)
+docs.repository(
+    name = "docs_rules_quickjs",
+    commit = "f0e6dfebdfe9175e6ee8dce9d87bf50a18187206",
+    project = "rules_quickjs",
+)
+docs.repository(
+    name = "docs_rules_compress",
+    commit = "ed08e74d0c0744b1e0469e218ddf631ef36baab1",
+    project = "rules_compress",
+)
+docs.repository(
+    name = "docs_rules_html",
+    commit = "2162ee73b5e115012592b757216a0b321a939694",
+    project = "rules_html",
+)
+use_repo(
+    docs,
+    "docs_rules_compress",
+    "docs_rules_html",
+    "docs_rules_quickjs",
+    "docs_tools",
+)

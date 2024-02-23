@@ -1,0 +1,2 @@
+build --disk_cache=~/.npm/bazel
+build --repository_cache=~/.npm/bazel-repo

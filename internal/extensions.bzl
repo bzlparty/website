@@ -69,3 +69,22 @@ docs = module_extension(
         }),
     },
 )
+
+def _css_impl(ctx):
+    ctx.download(
+        output = "lissom.css",
+        url = "https://raw.githubusercontent.com/lissomware/css/00a08324134616a60bc3f21ebda92b349d19b731/lissom.min.css",
+        integrity = "sha384-9+IaBL1uGqkYxp0d/br3fzTKrtgMZ0o4H5YyzvYnPglnCyMAqVDpqOPaVckHXlKQ",
+    )
+    ctx.file("BUILD", """\
+package(default_visibility = ["//visibility:public"])
+exports_files(["lissom.css"])
+alias(
+  name = "lissom",
+  actual = "lissom.css",
+)
+""")
+
+css_lib = repository_rule(_css_impl)
+
+css = module_extension(lambda _: css_lib(name = "css"))

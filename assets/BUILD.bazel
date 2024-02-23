@@ -5,8 +5,8 @@ pkg_tar(
     srcs = [
         ":avatar.jpg",
         ":favicon.ico",
-        ":lissom.min.css",
         ":styles.css",
+        "@css//:lissom",
     ],
     package_dir = "assets",
     visibility = ["//visibility:public"],

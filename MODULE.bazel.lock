@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "682994b5ccd79c9c554bddc625044601168c8932103d0f61d471e676848277f0",
+  "moduleFileHash": "8e93d534cee12839d88412522e67c099261d06e5f6499b1966eec5dbf4b721bf",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -128,6 +128,23 @@
               }
             }
           ],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        },
+        {
+          "extensionBzlFile": "@bzlparty_website//internal:extensions.bzl",
+          "extensionName": "css",
+          "usingModule": "<root>",
+          "location": {
+            "file": "@@//:MODULE.bazel",
+            "line": 49,
+            "column": 20
+          },
+          "imports": {
+            "css": "css"
+          },
+          "devImports": [],
+          "tags": [],
           "hasDevUseExtension": false,
           "hasNonDevUseExtension": true
         }
@@ -1403,9 +1420,25 @@
     }
   },
   "moduleExtensions": {
+    "//internal:extensions.bzl%css": {
+      "general": {
+        "bzlTransitiveDigest": "OTi00r1L7EUSJ1yp60FRmZdpT5UmPmC0jZecjOVb0h4=",
+        "accumulatedFileDigests": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "css": {
+            "bzlFile": "@@//internal:extensions.bzl",
+            "ruleClassName": "css_lib",
+            "attributes": {
+              "name": "_main~css~css"
+            }
+          }
+        }
+      }
+    },
     "//internal:extensions.bzl%docs": {
       "general": {
-        "bzlTransitiveDigest": "rUC2fy7RVO0PF8XlD4ocYZChSN2v4oHaNlrOiMHMk5M=",
+        "bzlTransitiveDigest": "OTi00r1L7EUSJ1yp60FRmZdpT5UmPmC0jZecjOVb0h4=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

@@ -1,7 +1,7 @@
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 
 exports_files([
-    "package.html",
+    "page.html",
     "serve_html.sh",
 ])
 

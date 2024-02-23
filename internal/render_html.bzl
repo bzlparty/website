@@ -55,7 +55,7 @@ render_html = rule(
             providers = [PackageFilegroupInfo],
         ),
         "package": attr.string(),
-        "template": attr.label(allow_single_file = True, default = ":package.html"),
+        "template": attr.label(allow_single_file = True, default = ":page.html"),
         "renderer": attr.label(
             default = ":render_html",
             cfg = "exec",

@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,15 +18,6 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-var (
-	assets       []string
-	excludePath  string
-	files        FilePair
-	packageName  string
-	templateFile FileContent
-	config       PackageConfig
-)
-
 type Link struct {
 	Name string
 	Href string
@@ -34,22 +25,21 @@ type Link struct {
 
 type TemplateData struct {
 	Title    string
-	Heading  string
 	Content  string
 	NavLinks []Link
 	Package  string
-	Css      []string
 }
 
-type FileConfig struct {
+type FileInfo struct {
 	SourcePath string `json:"source_path"`
 	TargetPath string `json:"target_path"`
 	Target     string `json:"target"`
 }
-type PackageConfig struct {
-	Name     string       `json:"name"`
-	Files    []FileConfig `json:"files"`
-	Template string       `json:"template"`
+
+type JsonConfig struct {
+	Name     string     `json:"name"`
+	Files    []FileInfo `json:"files"`
+	Template string     `json:"template"`
 }
 
 type RenderedFile struct {
@@ -59,15 +49,17 @@ type RenderedFile struct {
 	TargetPath string
 }
 
-func renderFiles(files []FileConfig) (result []RenderedFile) {
-	for _, file := range config.Files {
-		content, err := ioutil.ReadFile(file.SourcePath)
+func renderFiles(c JsonConfig) (result []RenderedFile, err error) {
+	var content []byte
+	for _, file := range c.Files {
+		content, err = ioutil.ReadFile(file.SourcePath)
 
 		if err != nil {
-			log.Fatal(fmt.Sprintf("Error processing file %s", file.SourcePath), err)
+			return
 		}
 
 		doc := parseMarkdown(content)
+		rewriteLocalLinks(doc, c.Name)
 		html := renderHTML(doc)
 		heading := getFirstHeading(doc)
 		result = append(result, RenderedFile{
@@ -81,7 +73,7 @@ func renderFiles(files []FileConfig) (result []RenderedFile) {
 	return
 }
 
-func generatePackageLinks(files []RenderedFile, _package string) (links []Link) {
+func generatePackageLinks(files []RenderedFile) (links []Link) {
 	for _, file := range files {
 		if filepath.Base(file.Target) == "index.html" {
 			continue
@@ -106,106 +98,78 @@ func getTitle(file *RenderedFile, packageName string) string {
 	return fmt.Sprintf("%s %s", heading, title)
 }
 
-func main() {
-	parseFlags()
+func processFiles(c JsonConfig) (err error) {
+	renderedFiles, err := renderFiles(c)
+	if err != nil {
+		return
+	}
+	links := generatePackageLinks(renderedFiles)
+	templateFile, err := ioutil.ReadFile(c.Template)
 
-	var renderedFiles = renderFiles(config.Files)
-	var links = generatePackageLinks(renderedFiles, config.Name)
-
-	templateFile, err := ioutil.ReadFile(config.Template)
-
-	// sort.Slice(nav, func(i, j int) bool {
-	// 	return nav[i].Name < nav[j].Name
-	// })
+	if err != nil {
+		return
+	}
 
 	t, err := template.New("page").Parse(string(templateFile))
 
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
 	for _, file := range renderedFiles {
 		data := TemplateData{
-			Title:    getTitle(&file, config.Name),
-			Package:  config.Name,
+			Title:    getTitle(&file, c.Name),
+			Package:  c.Name,
 			NavLinks: links,
 			Content:  file.Content,
 		}
 
-		output, err := os.Create(file.TargetPath)
+		var output io.Writer
+		output, err = os.Create(file.TargetPath)
+
 		if err != nil {
-			os.Exit(128)
+			return
 		}
 
 		if err = t.Execute(output, data); err != nil {
-			log.Fatal(fmt.Sprintf("Could not write content to file %s", file.TargetPath))
-			os.Exit(128)
+			return
 		}
+	}
+
+	return
+}
+
+func main() {
+	var config JsonConfig
+	parseConfig(&config)
+
+	if err := processFiles(config); err != nil {
+		log.Fatal(fmt.Sprintf("There was an Error, %s", err.Error()))
+		os.Exit(127)
 	}
 }
 
-func parseFlags() {
+func parseConfig(c *JsonConfig) {
 	flag.Func("jsonConfig", "JSON Config string", func(value string) error {
-		json.Unmarshal([]byte(value), &config)
+		json.Unmarshal([]byte(value), c)
 		return nil
 	})
 	flag.Parse()
 }
 
-type FilePair map[string]string
-
-func (v *FilePair) String() string {
-	var r []string
-
-	for source, target := range *v {
-		r = append(r, fmt.Sprintf("%s:%s", source, target))
-	}
-
-	return strings.Join(r, ",")
-}
-
-func (v *FilePair) Set(s string) error {
-	r := make(map[string]string)
-
-	for _, f := range strings.Split(s, ",") {
-		source, target, err := splitFiles(f)
-
-		if err != nil {
-			return err
+func rewriteLocalLinks(doc ast.Node, packageName string) {
+	ast.WalkFunc(doc, func(node ast.Node, entering bool) ast.WalkStatus {
+		if l, ok := node.(*ast.Link); ok && entering {
+			href := string(l.Destination)
+			if strings.HasPrefix(href, "/") {
+				link := strings.Replace(href, ".md", ".html", 1)
+				l.Destination = []byte(fmt.Sprintf("/%s%s", packageName, link))
+				return ast.Terminate
+			}
 		}
 
-		r[source] = target
-	}
-
-	if len(r) == 0 {
-		return errors.New("No files given")
-	}
-
-	*v = r
-
-	return nil
-}
-
-type FileContent []byte
-
-func (v *FileContent) Set(path string) (err error) {
-	*v, err = ioutil.ReadFile(path)
-
-	return
-}
-
-func (v *FileContent) String() string {
-	return string(*v)
-}
-
-func splitFiles(s string) (string, string, error) {
-	x := strings.Split(s, ":")
-
-	if len(x) < 2 {
-		return "", "", errors.New("File pair uncomplete")
-	}
-
-	return x[0], x[1], nil
+		return ast.GoToNext
+	})
 }
 
 func getFirstHeading(doc ast.Node) (heading string) {

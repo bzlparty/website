@@ -11,13 +11,13 @@ All projects are [_free software_](https://www.gnu.org/philosophy/free-sw.en.htm
   <dd>Bazel Rules for QuickJS</dd>
 
   <dt><strong><a href="/rules_html">rules_html</strong></a></dt>
-  <dd>A giant owl-like creature.</dd>
+  <dd>Bazel Rules for HTML</dd>
 
   <dt><strong><a href="/rules_compress">rules_compress</strong></a></dt>
   <dd>Bazel Rules for File Compression</dd>
 
   <dt><strong><a href="/tools">tools</a></strong></dt>
-  <dd>Bazel Rules for HTML</dd>
+  <dd>Functionality and tooling used in bzlparty rulesets</dd>
 </dl>
 
 See bzlparty modules in the [Bazel Central Registry](https://registry.bazel.build/search?q=bzlparty).

@@ -52,7 +52,7 @@ type RenderedFile struct {
 func renderFiles(c JsonConfig) (result []RenderedFile, err error) {
 	var content []byte
 	for _, file := range c.Files {
-		content, err = ioutil.ReadFile(file.SourcePath)
+		content, err = os.ReadFile(file.SourcePath)
 
 		if err != nil {
 			return

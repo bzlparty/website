@@ -20,7 +20,7 @@ use_repo(
 docs = use_extension("//internal:extensions.bzl", "docs")
 docs.repository(
     name = "docs_tools",
-    commit = "4fcedfa5a171f37d035112658ae59df01eba364e",
+    commit = "df6905bf020a12af478d02cc91227e1d60f04632",
     project = "tools",
 )
 docs.repository(

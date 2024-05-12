@@ -1,3 +1,4 @@
 bazel-*
 *.tar.gz
 node_modules
+MODULE.bazel.lock

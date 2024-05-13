@@ -66,6 +66,10 @@ footer > p {
   text-align: center;
 }
 
+footer > p > i {
+  color: var(--accent-ui);
+}
+
 table {
   width: 100%;
 }

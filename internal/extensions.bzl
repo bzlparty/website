@@ -32,12 +32,13 @@ pkg_files(
     """.format(path))
 
     targets.append(":files")
+    ctx.file("commit.info", ctx.attr.commit)
     ctx.file("BUILD.bazel", """\
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files", "pkg_filegroup")
 
 pkg_files(
     name = "files",
-    srcs = glob(["*.md"]),
+    srcs = glob(["*.md"]) + ["commit.info"],
     visibility = ["//visibility:public"],
 )
 

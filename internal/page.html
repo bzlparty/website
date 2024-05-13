@@ -39,7 +39,13 @@
         bzlparty is free software, its source code is availabel on
         <a href="https://github.com/bzlparty">Github</a>
       </p>
-      <p>Built with <i class="nf nf-seti-bazel"></i></p>
+      <p>
+        Built with <i class="nf nf-seti-bazel"></i> on {{ .Time }}{{ if .Commit
+        }} from
+        <a href="https://github.com/bzlparty/{{ .Package }}/tree/{{ .Commit }}"
+          >{{ slice .Commit 0 7 }}</a
+        >{{ end }}
+      </p>
     </footer>
   </body>
 </html>

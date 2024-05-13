@@ -5,12 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/ast"
@@ -25,9 +25,11 @@ type Link struct {
 
 type TemplateData struct {
 	Title    string
+  Commit string
 	Content  string
 	NavLinks []Link
 	Package  string
+  Time string
 }
 
 type FileInfo struct {
@@ -98,13 +100,13 @@ func getTitle(file *RenderedFile, packageName string) string {
 	return fmt.Sprintf("%s %s", heading, title)
 }
 
-func processFiles(c JsonConfig) (err error) {
+func processFiles(c JsonConfig, commit string) (err error) {
 	renderedFiles, err := renderFiles(c)
 	if err != nil {
 		return
 	}
 	links := generatePackageLinks(renderedFiles)
-	templateFile, err := ioutil.ReadFile(c.Template)
+	templateFile, err := os.ReadFile(c.Template)
 
 	if err != nil {
 		return
@@ -116,11 +118,15 @@ func processFiles(c JsonConfig) (err error) {
 		return
 	}
 
+  buildTime := time.Now()
+
 	for _, file := range renderedFiles {
 		data := TemplateData{
 			Title:    getTitle(&file, c.Name),
 			Package:  c.Name,
 			NavLinks: links,
+      Commit: commit,
+      Time: buildTime.Format(time.RFC1123Z),
 			Content:  file.Content,
 		}
 
@@ -141,17 +147,26 @@ func processFiles(c JsonConfig) (err error) {
 
 func main() {
 	var config JsonConfig
-	parseConfig(&config)
+  var commit string
+	parseArgs(&config, &commit)
 
-	if err := processFiles(config); err != nil {
+	if err := processFiles(config, commit); err != nil {
 		log.Fatal(fmt.Sprintf("There was an Error, %s", err.Error()))
 		os.Exit(127)
 	}
 }
 
-func parseConfig(c *JsonConfig) {
+func parseArgs(c *JsonConfig, commit *string) {
 	flag.Func("jsonConfig", "JSON Config string", func(value string) error {
 		json.Unmarshal([]byte(value), c)
+		return nil
+	})
+	flag.Func("commit", "commit info file", func(value string) error {
+    content, err := os.ReadFile(value)
+    if err != nil {
+      return err
+    }
+    *commit = string(content)
 		return nil
 	})
 	flag.Parse()

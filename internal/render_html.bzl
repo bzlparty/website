@@ -11,14 +11,15 @@ def _render_html_impl(ctx):
         template = ctx.file.template.path,
     )
     pkg_files = []
+    commit_file = None
     for (data, _) in ctx.attr.src[PackageFilegroupInfo].pkg_files:
         dest_src_map = {}
         for (s, f) in data.dest_src_map.items():
-            target = s.replace("README", "index").replace(".md", ".html")
+            if s.endswith("commit.info"):
+                commit_file = f
+                continue
 
-            # print(target)
-            # target = "/".join(target.split("/")[1:])
-            # print(target)
+            target = s.replace("README", "index").replace(".md", ".html")
             output = ctx.actions.declare_file(target)
             dest_src_map[target] = output
             outputs.append(output)
@@ -31,6 +32,8 @@ def _render_html_impl(ctx):
 
     args = ctx.actions.args()
     args.add("-jsonConfig", json.encode(package_info))
+    if commit_file:
+        args.add("-commit", commit_file.path)
 
     ctx.actions.run(
         inputs = ctx.files.src + [ctx.file.template],
